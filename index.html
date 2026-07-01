@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stephen Davis — UX Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #14181c;
+    --surface: #1b2126;
+    --surface-2: #20272d;
+    --text: #eceff1;
+    --text-dim: #8b97a0;
+    --rinse: #34c3ff;
+    --warm: #ff7a45;
+    --border: rgba(255,255,255,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--rinse); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  /* ---------- Header ---------- */
+  header.site {
+    padding: 28px 0 0;
+  }
+  header.site .wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .brand {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 20px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  nav a {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-left: 24px;
+  }
+  nav a:hover { color: var(--text); text-decoration: none; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    padding: 64px 0 56px;
+  }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--rinse);
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: clamp(40px, 7vw, 64px);
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero p.sub {
+    color: var(--text-dim);
+    font-size: 18px;
+    max-width: 540px;
+    margin-bottom: 40px;
+  }
+
+  /* ---------- Squeegee slider ---------- */
+  .squeegee {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    height: 220px;
+    user-select: none;
+  }
+  .panel {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 32px;
+  }
+  .panel.after {
+    background: linear-gradient(135deg, #16323d, #14181c);
+  }
+  .panel.before {
+    background: linear-gradient(135deg, #3a2420, #14181c);
+  }
+  .panel .tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .panel.before .tag { color: #ff9a76; }
+  .panel.after .tag { color: var(--rinse); }
+  .panel .num {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 64px;
+    line-height: 1;
+  }
+  .panel .cap {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    max-width: 260px;
+  }
+  #wipeClip {
+    position: absolute;
+    inset: 0;
+    clip-path: inset(0 calc(100% - var(--wipe, 38%)) 0 0);
+    transition: clip-path 0.05s linear;
+  }
+  .handle-track {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: ew-resize;
+  }
+  .handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--wipe, 38%);
+    width: 2px;
+    background: var(--text);
+    transform: translateX(-1px);
+    pointer-events: none;
+  }
+  .handle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--text);
+    transform: translate(-50%, -50%);
+  }
+  .handle::before {
+    content: '⇆';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -55%);
+    color: var(--bg);
+    font-size: 16px;
+    font-weight: 700;
+    z-index: 2;
+  }
+  .drag-hint {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-top: 14px;
+    letter-spacing: 0.04em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #wipeClip { transition: none; }
+  }
+
+  /* ---------- Sections ---------- */
+  section { padding: 56px 0; border-top: 1px solid var(--border); }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+  }
+
+  h2 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 30px;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    letter-spacing: -0.01em;
+  }
+
+  .about p { color: var(--text-dim); max-width: 640px; font-size: 16px; }
+  .about p + p { margin-top: 14px; }
+
+  /* ---------- Case study ---------- */
+  .case-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 36px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .case-meta span b { color: var(--text); font-weight: 500; }
+
+  .stage {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 24px;
+    padding: 28px 0;
+    border-top: 1px solid var(--border);
+  }
+  .stage:first-of-type { border-top: none; }
+  .stage-name {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 19px;
+    text-transform: uppercase;
+    color: var(--rinse);
+    line-height: 1.2;
+  }
+  .stage-body p { color: var(--text-dim); font-size: 15.5px; }
+
+  @media (max-width: 600px) {
+    .stage { grid-template-columns: 1fr; gap: 8px; }
+  }
+
+  .outcome-card {
+    margin-top: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .outcome-number {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 44px;
+    color: var(--warm);
+    white-space: nowrap;
+  }
+  .outcome-text { color: var(--text-dim); font-size: 14.5px; max-width: 420px; }
+  .outcome-text b { color: var(--text); }
+
+  .next-step {
+    margin-top: 20px;
+    font-size: 14.5px;
+    color: var(--text-dim);
+    border-left: 2px solid var(--warm);
+    padding-left: 16px;
+  }
+  .next-step b { color: var(--text); }
+
+  .case-links { margin-top: 28px; font-size: 14.5px; }
+
+  /* ---------- Scrollable preview gallery ---------- */
+  .gallery {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 4px 4px 14px;
+    margin-top: 28px;
+  }
+  .gallery::-webkit-scrollbar { height: 6px; }
+  .gallery::-webkit-scrollbar-track { background: transparent; }
+  .gallery::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .gallery-item {
+    flex: 0 0 auto;
+    width: 260px;
+    scroll-snap-align: start;
+  }
+  .gallery-item img {
+    width: 100%;
+    height: 160px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    object-fit: cover;
+    display: block;
+    background: var(--surface);
+    cursor: pointer;
+  }
+  .gallery-placeholder {
+    width: 100%;
+    height: 160px;
+    border-radius: 8px;
+    border: 1px dashed var(--border);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-align: center;
+    padding: 12px;
+  }
+  .gallery-caption {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  /* ---------- Skills ---------- */
+  .skills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .skill-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 100px;
+    color: var(--text-dim);
+  }
+
+  /* ---------- Next case study placeholder ---------- */
+  .placeholder-card {
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 28px;
+    color: var(--text-dim);
+    font-size: 15px;
+  }
+  .placeholder-card b { color: var(--text); }
+
+  /* ---------- Footer ---------- */
+  footer {
+    padding: 40px 0 56px;
+    border-top: 1px solid var(--border);
+  }
+  footer .wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  footer .loc { color: var(--text-dim); font-size: 14px; }
+  footer .links a { margin-left: 18px; font-size: 14px; color: var(--text-dim); }
+  footer .links a:hover { color: var(--rinse); }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <div class="brand">Stephen Davis</div>
+    <nav>
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Portfolio — UX / Product Design</div>
+    <h1>I find the friction.<br>Then I wipe it clean.</h1>
+    <p class="sub">UX designer and small-business owner. I redesigned my own detailing business's booking flow and cut an estimated 5 missed bookings a day down to zero.</p>
+
+    <div class="squeegee" id="squeegee">
+      <div class="panel after">
+        <div class="tag">After</div>
+        <div class="num">0</div>
+        <div class="cap">missed calls / day, by my own tracking</div>
+      </div>
+      <div id="wipeClip">
+        <div class="panel before">
+          <div class="tag">Before</div>
+          <div class="num">~5</div>
+          <div class="cap">missed calls / day — booking only by phone or text</div>
+        </div>
+      </div>
+      <div class="handle"></div>
+      <input type="range" id="wipeRange" min="0" max="100" value="38"
+        class="handle-track" aria-label="Drag to compare before and after missed calls per day">
+    </div>
+    <div class="drag-hint">← drag to compare →</div>
+  </div>
+</section>
+
+<section id="about" class="about">
+  <div class="wrap">
+    <div class="section-label">About</div>
+    <p>I run Splash Bros Detailing, a mobile and drop-off detailing business in Waterloo, WI. I also work a separate day job, so when the business's booking process broke down, I had to fix it myself — no team, no budget for a developer.</p>
+    <p>That constraint became my first real UX project: diagnose the problem, research how others solved it, build something, get feedback from actual customers, and redesign around what they told me. I'm now formalizing that instinct with the Google UX Design Certificate, Google AI Essentials, and hands-on practice in Figma.</p>
+  </div>
+</section>
+
+<section id="work">
+  <div class="wrap">
+    <div class="section-label">Case Study 01</div>
+    <h2>Splash Bros Detailing</h2>
+    <div class="case-meta">
+      <span>Role: <b>Owner &amp; Designer</b></span>
+      <span>Timeline: <b>2024 – Present</b></span>
+      <span>Live site: <b><a href="https://www.splashbrosdetail.com" target="_blank" rel="noopener">splashbrosdetail.com</a></b></span>
+    </div>
+
+    <div class="stage">
+      <div class="stage-name">Diagnosis</div>
+      <div class="stage-body">
+        <p>Every booking ran through a phone call or text message. I work a day job, so I couldn't always answer — by my own count, that cost the business at least 5 missed calls a day. Each missed call wasn't just a missed message, it was a lost booking.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-name">Strip &amp; Prep</div>
+      <div class="stage-body">
+        <p>I researched how other detailing and local-service businesses handled booking online, and studied scheduling tools to see what a self-serve flow could look like. At the same time, I started teaching myself to build automated assistants that could field routine questions, so once a job was booked I could go straight to the work instead of the inbox — something I'm still developing, not yet live on the site.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-name">Detail Pass</div>
+      <div class="stage-body">
+        <p>My first version of the site was honestly more of a showcase — photos of finished cars, a portfolio of my work — than a tool built to convert visitors into bookings. Customers told me directly: make it more user-friendly, easier to navigate, and get straight to the point so they can book and be done.</p>
+        <p>I rebuilt around that feedback. Cut the showcase down, put a booking calendar and a $25 deposit front and center, and shortened the path from landing on the page to confirming an appointment.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-name">Final Inspection</div>
+      <div class="stage-body">
+        <div class="outcome-card">
+          <div class="outcome-number">5 → 0</div>
+          <div class="outcome-text"><b>Estimated missed calls per day</b>, before vs. after the redesign — self-tracked, not pulled from analytics.</div>
+        </div>
+        <div class="next-step"><b>What I'd do next:</b> instrument real funnel data (page visits → completed bookings) instead of relying on estimates, and prototype the AI booking assistant in Figma before building it for real.</div>
+      </div>
+    </div>
+
+    <div class="case-links">→ <a href="https://www.splashbrosdetail.com" target="_blank" rel="noopener">View the live site</a></div>
+
+    <div class="gallery">
+      <div class="gallery-item">
+        <img src="images/splash-home.jpg" alt="Splash Bros Detailing homepage"
+          onerror="this.outerHTML='&lt;div class=&quot;gallery-placeholder&quot;&gt;Add screenshot&lt;br&gt;images/splash-home.jpg&lt;/div&gt;'">
+        <div class="gallery-caption">Homepage</div>
+      </div>
+      <div class="gallery-item">
+        <img src="images/splash-booking.jpg" alt="Splash Bros Detailing booking calendar"
+          onerror="this.outerHTML='&lt;div class=&quot;gallery-placeholder&quot;&gt;Add screenshot&lt;br&gt;images/splash-booking.jpg&lt;/div&gt;'">
+        <div class="gallery-caption">Booking calendar</div>
+      </div>
+      <div class="gallery-item">
+        <img src="images/splash-deposit.jpg" alt="Splash Bros Detailing deposit confirmation"
+          onerror="this.outerHTML='&lt;div class=&quot;gallery-placeholder&quot;&gt;Add screenshot&lt;br&gt;images/splash-deposit.jpg&lt;/div&gt;'">
+        <div class="gallery-caption">Deposit confirmation</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-label">Case Study 02</div>
+    <h2>Study Genie</h2>
+    <div class="case-meta">
+      <span>Role: <b>Solo Founder &amp; Builder</b></span>
+      <span>Status: <b>Active demo / testing</b></span>
+      <span>Live site: <b><a href="https://stephsarchives.github.io/studygenie/" target="_blank" rel="noopener">stephsarchives.github.io/studygenie</a></b></span>
+    </div>
+
+    <div class="stage">
+      <div class="stage-name">The Spark</div>
+      <div class="stage-body">
+        <p>Studying is usually boring, and boring doesn't stick. I noticed that the times I retained the most weren't sitting at a desk grinding — they were moments like driving to work and thinking through a class topic almost like I was listening to a podcast about it. I wanted to build that feeling on purpose: make learning entertaining enough that people actually want to engage with it, because engagement is what turns into better grades, not just more study time.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-name">Built Solo</div>
+      <div class="stage-body">
+        <p>I designed and built the entire platform myself, end to end — frontend, backend, database, AI integration, and payments. No team, no co-founder. I own every decision in the product, for better and worse.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-name">Testing With Real Users</div>
+      <div class="stage-body">
+        <p>I'm currently testing the product directly with students and with college staff who can help get it in front of more students. I'm using their feedback to figure out what actually makes someone keep using a study tool versus abandoning it after one session.</p>
+        <p>Separately, I audited the product for accessibility and found real problems — broken light/dark mode theming, low contrast text, and missing keyboard navigation on custom UI components. I used AI tooling to help diagnose and fix those issues as part of an ongoing redesign.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-name">Current Status</div>
+      <div class="stage-body">
+        <div class="outcome-card">
+          <div class="outcome-number" style="font-size:28px; color: var(--rinse);">Active Testing</div>
+          <div class="outcome-text">The accessibility and theming redesign has been implemented. The product is in demo and active testing with real students — I don't have quantified outcome metrics yet, and I'd rather say that plainly than guess.</div>
+        </div>
+        <div class="next-step"><b>What I'd do next:</b> instrument real usage data — session length, return rate, quiz completion — so the next version of this case study has measured outcomes instead of a status update.</div>
+      </div>
+    </div>
+    <div class="case-links">→ <a href="https://stephsarchives.github.io/studygenie/" target="_blank" rel="noopener">View the live demo</a></div>
+
+    <div class="gallery">
+      <div class="gallery-item">
+        <img src="images/studyforge-dashboard.jpg" alt="StudyForge dashboard"
+          onerror="this.outerHTML='&lt;div class=&quot;gallery-placeholder&quot;&gt;Add screenshot&lt;br&gt;images/studyforge-dashboard.jpg&lt;/div&gt;'">
+        <div class="gallery-caption">Dashboard</div>
+      </div>
+      <div class="gallery-item">
+        <img src="images/studyforge-quiz.jpg" alt="StudyForge AI-generated quiz"
+          onerror="this.outerHTML='&lt;div class=&quot;gallery-placeholder&quot;&gt;Add screenshot&lt;br&gt;images/studyforge-quiz.jpg&lt;/div&gt;'">
+        <div class="gallery-caption">AI-generated quiz</div>
+      </div>
+      <div class="gallery-item">
+        <img src="images/studyforge-theme.jpg" alt="StudyForge light/dark theme toggle"
+          onerror="this.outerHTML='&lt;div class=&quot;gallery-placeholder&quot;&gt;Add screenshot&lt;br&gt;images/studyforge-theme.jpg&lt;/div&gt;'">
+        <div class="gallery-caption">Light/dark theme (accessibility fix)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-label">Tools &amp; Skills</div>
+    <div class="skills-grid">
+      <span class="skill-chip">Figma (foundational)</span>
+      <span class="skill-chip">Design thinking</span>
+      <span class="skill-chip">User research &amp; feedback synthesis</span>
+      <span class="skill-chip">Wireframing &amp; prototyping (in progress)</span>
+      <span class="skill-chip">HTML / CSS</span>
+      <span class="skill-chip">AI-assisted workflows</span>
+      <span class="skill-chip">Process improvement</span>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="loc">Waterloo, WI</div>
+    <div class="links">
+      <a href="mailto:davislaron05@gmail.com">Email</a>
+      <a href="https://www.linkedin.com/in/stephen-davis583b72322/" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const range = document.getElementById('wipeRange');
+  const sq = document.getElementById('squeegee');
+  function setWipe(v) {
+    sq.style.setProperty('--wipe', v + '%');
+  }
+  range.addEventListener('input', (e) => setWipe(e.target.value));
+  setWipe(range.value);
+</script>
+
+</body>
+</html>
